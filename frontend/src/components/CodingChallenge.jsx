@@ -74,7 +74,7 @@ const totalTestCases = question?.testcases?.length || 0;  // Default to 0 if tes
     }
     const titles = data.map((item) => item.questions.title);
 
-      const response = await axios.post("http://localhost:5000/generate/next", {
+      const response = await axios.post("https://codeforge-4k0k.onrender.com/generate/next", {
         user_id:user_id,
         topic: question.topic,
         weaknesses:weaknesses,
@@ -110,7 +110,7 @@ const totalTestCases = question?.testcases?.length || 0;  // Default to 0 if tes
     setOutput("Running code against visible test cases...");
     
     try {
-      const res = await axios.post("http://localhost:5000/submit", {
+      const res = await axios.post("https://codeforge-4k0k.onrender.com/submit", {
         language,
         source_code: code,
         testCases: visibleTestCases,
@@ -145,91 +145,67 @@ const totalTestCases = question?.testcases?.length || 0;  // Default to 0 if tes
     setTimeTaken(timeSpent);
     setAttempts(prev => prev + 1);
     setSubmitted(true);
-    const {data,error}=await supabase.from("questions").update({code:code,language:language}).eq("id",questionId).eq("user_id",user_id).select();
-    if(error){
-      console.log("error updating code:", error);
-    }
+    
     try {
-      const res = await axios.post("http://localhost:5000/submit", {
+      const {data,error} = await supabase.from("questions").update({code:code,language:language}).eq("id",questionId).eq("user_id",user_id).select();
+      if(error) console.log("error updating code:", error);
+  
+      const res = await axios.post("https://codeforge-4k0k.onrender.com/submit", {
         language,
         source_code: code,
         testCases: question.testcases,
       });
-      console.log(res.data);
-      settestres(res.data);
+      
+      settestres(res.data); // Set the test results in state
       const passedCount = res.data.results.filter(result => result.passed).length;
       setPassedTests(passedCount);
-
+  
       if (passedCount == totalTestCases) {
         setOutput(`✓ All ${totalTestCases} test cases passed!\nTime taken: ${timeSpent} seconds\nAttempts: ${attempts + 1}`);
-        
       } else {
-        console.log("Not all test cases passed");
-        const failedDetails = res.data.results
-  .filter(result => !result.passed)
-  .map((result, index) => {
-    const testCase = question.testcases[index];
-    return (
-      `Failed Test ${index + 1}:\n` +
-      `Input: ${testCase.input}\n` +
-      `Expected Output: ${result.expected_output}\n` +
-      `Your Output: ${result.actual_output}\n` +
-      `${result.error ? `Error: ${result.error}\n` : ''}` +
-      `----------------------------------`
-    );
-  })
-  .join('\n\n');
-        
-        setOutput(`✗ ${passedCount}/${totalTestCases} test cases passed\n\nFailed Cases:\n${failedDetails}\n\nTime taken: ${timeSpent} seconds\nAttempts: ${attempts + 1}`);
+        // ... (keep your existing failed details code)
       }
-    } catch (error) {
-      setOutput("Error submitting code. Please try again.");
-    } finally {
-      try{
-      const w = await axios.post("http://localhost:5000/weakness", {
-        user_id:user_id
-      })
-      console.log(w);
-      setWeaknesses(w.data.weaknesses);
-    }
-      catch(error){
-        console.log("Error fetching weaknesses:", error);
-      }
+  
+      // Use res.data directly instead of testres
       try {
-        const analysisRes = await axios.post("http://localhost:5000/analyze", {
+        const w = await axios.post("https://codeforge-4k0k.onrender.com/weakness", { user_id });
+        setWeaknesses(w.data.weaknesses);
+  
+        const analysisRes = await axios.post("https://codeforge-4k0k.onrender.com/analyze", {
           code,
           language,
           question,
-          testResults: testres.results,
+          testResults: res.data.results, // Use res.data instead of testres.results
           attempts: attempts + 1,
           timeSpentInSeconds: timeSpent,
-          previousWeaknesses: weaknesses ,
-          user_id:user_id
+          previousWeaknesses: weaknesses,
+          user_id
         });
-        const {data,error}=await supabase.from("submissions").insert([{
-          question_id:questionId,
-          user_id:user_id,
-          code:code,
-          language:language,
-          test_results:testres.results,
-          time_spent:timeSpent,
-          attempts:attempts+1,
-          xp:question.xp
-        }])
-        if(error){
-          console.error("failed saving submission:", error);
-        }
+  
+        const { error: submissionError } = await supabase.from("submissions").insert([{
+          question_id: questionId,
+          user_id: user_id,
+          code: code,
+          language: language,
+          test_results: res.data.results, // Use res.data here too
+          time_spent: timeSpent,
+          attempts: attempts + 1,
+          xp: question.xp
+        }]);
+  
+        if(submissionError) console.error("failed saving submission:", submissionError);
+        
         setAnalysis(analysisRes.data.analysis);
         setWeaknesses(analysisRes.data.weaknesses);
       } catch (analysisError) {
         console.log("Analysis failed:", analysisError);
       }
+    } catch (error) {
+      setOutput("Error submitting code. Please try again.");
+    } finally {
       setLoading(false);
     }
   };
-
-  
-  
 
   const toggleHint = () => {
     setShowHint(!showHint);

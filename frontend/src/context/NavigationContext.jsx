@@ -71,7 +71,7 @@ export const NavigationProvider = ({ children }) => {
         setTimeout(() => reject(new Error("Timeout: API call exceeded time limit.")), TIMEOUT)
       );
   
-      const apiCallPromise = axios.post("http://localhost:5000/generate/first", {
+      const apiCallPromise = axios.post("https://codeforge-4k0k.onrender.com/generate/first", {
         topic: topic,
         user_id: user.id,
       });
