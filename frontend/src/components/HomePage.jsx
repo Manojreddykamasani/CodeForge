@@ -32,7 +32,7 @@ const HomeContent = () => {
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {/* Featured cards */}
-          <button onClick={goToCodingPlayground()}>
+          <button onClick={() => goToCodingPlayground("arrays")}>
           <FeaturedCard 
             icon="🚀" 
             title="Getting Started with DSA" 
@@ -59,52 +59,68 @@ const HomeContent = () => {
       
       {/* Topic Categories */}
       <section className="mb-8">
-        <h2 className="text-2xl font-bold mb-6">Core DSA Topics</h2>
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
-          <button onClick={goToCodingPlayground}>
-            <TopicCard 
-              icon="📊" 
-              title="Arrays & Strings" 
-              description="Master fundamental data structures with hands-on examples" 
-            />
-          </button>
-          <TopicCard 
-            icon="🔄" 
-            title="Linked Lists" 
-            description="Learn to manipulate pointers and traverse nodes efficiently" 
-          />
-          <TopicCard 
-            icon="🌳" 
-            title="Trees & Graphs" 
-            description="Explore hierarchical and networked structures" 
-          />
-          <TopicCard 
-            icon="⚡" 
-            title="Dynamic Programming" 
-            description="Optimize solutions with memoization techniques" 
-          />
-          <TopicCard 
-            icon="🔍" 
-            title="Searching Algorithms" 
-            description="Find elements efficiently using proven techniques" 
-          />
-          <TopicCard 
-            icon="📋" 
-            title="Sorting Techniques" 
-            description="Compare and implement various sorting algorithms" 
-          />
-          <TopicCard 
-            icon="🧩" 
-            title="Recursion & Backtracking" 
-            description="Master recursive problem-solving approaches" 
-          />
-          <TopicCard 
-            icon="⚖" 
-            title="Greedy Algorithms" 
-            description="Optimize solutions using incremental approach" 
-          />
-        </div>
-      </section>
+  <h2 className="text-2xl font-bold mb-6">Core DSA Topics</h2>
+  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
+    <button onClick={() => goToCodingPlayground("Arrays")}>
+      <TopicCard 
+        icon="📊" 
+        title="Arrays" 
+        description="Master linear data structures and character manipulation" 
+      />
+    </button>
+    <button onClick={() => goToCodingPlayground("Linkedlists")}>
+      <TopicCard 
+        icon="🔗" 
+        title="Linkedlists" 
+        description="Understand node-based data structures and pointer logic" 
+      />
+    </button>
+    <button onClick={() => goToCodingPlayground("Trees")}>
+      <TopicCard 
+        icon="🌳" 
+        title="Trees" 
+        description="Dive into hierarchical structures and traversals" 
+      />
+    </button>
+    <button onClick={() => goToCodingPlayground("Graphs")}>
+      <TopicCard 
+        icon="🌐" 
+        title="Graphs" 
+        description="Solve problems involving networks and connectivity" 
+      />
+    </button>
+    <button onClick={() => goToCodingPlayground("Dp")}>
+      <TopicCard 
+        icon="⚡" 
+        title="Dp" 
+        description="Optimize problems using dynamic programming techniques" 
+      />
+    </button>
+    <button onClick={() => goToCodingPlayground("Searching")}>
+      <TopicCard 
+        icon="🔍" 
+        title="Searching" 
+        description="Explore efficient element search methods" 
+      />
+    </button>
+    <button onClick={() => goToCodingPlayground("Sorting")}>
+      <TopicCard 
+        icon="🔀" 
+        title="Sorting" 
+        description="Understand algorithms to order data efficiently" 
+      />
+    </button>
+    <button onClick={() => goToCodingPlayground("Recursion")}>
+      <TopicCard 
+        icon="🧩" 
+        title="Recursion" 
+        description="Solve problems using self-calling functions" 
+      />
+    </button>
+  </div>
+</section>
+
+
     </div>
   );
 };

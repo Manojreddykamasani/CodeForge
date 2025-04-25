@@ -116,30 +116,35 @@ function AboutPage() {
           </section>
           
           {/* Team Section */}
-          <section className="bg-zinc-800/50 rounded-lg p-6 border border-zinc-700">
-            <h2 className="text-2xl font-semibold text-violet-400 mb-4">Our Team</h2>
-            <p className="text-gray-300 mb-6">
-              CodeForge was created by a team of passionate developers who believe in the power 
-              of deliberate practice and continuous learning.
-            </p>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <TeamMemberCard 
-                name="Alex Johnson" 
-                role="Founder & Lead Developer"
-                bio="Full-stack developer with 10+ years of experience. Passionate about education and clean code."
-              />
-              <TeamMemberCard 
-                name="Sarah Chen" 
-                role="Algorithm Expert"
-                bio="PhD in Computer Science specializing in algorithms and data structures. Former competitive programmer."
-              />
-              <TeamMemberCard 
-                name="Mike Rodriguez" 
-                role="UX Designer"
-                bio="Experienced designer focused on creating intuitive learning experiences for developers at all levels."
-              />
-            </div>
-          </section>
+<section className="bg-zinc-800/50 rounded-lg p-6 border border-zinc-700">
+  <h2 className="text-2xl font-semibold text-violet-400 mb-4">Our Team</h2>
+  <p className="text-gray-300 mb-6">
+    CodeForge was created by a team of passionate developers who believe in the power 
+    of deliberate practice and continuous learning.
+  </p>
+  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+    <TeamMemberCard 
+      name="Manoj Reddy" 
+      role="Full-stack  Developer & Team Lead"
+      bio="Senior developer with 5+ years of experience in building scalable backend systems. Leads the technical architecture and team coordination."
+    />
+    <TeamMemberCard 
+      name="Sreenidhi Reddy" 
+      role="Frontend Developer"
+      bio="Specializes in React and modern JavaScript frameworks. Focused on creating responsive and accessible user interfaces."
+    />
+    <TeamMemberCard 
+      name="Divija Reddy" 
+      role="Frontend Developer"
+      bio="UI/UX enthusiast with a keen eye for design details. Implements pixel-perfect interfaces with optimized performance."
+    />
+    <TeamMemberCard 
+      name="Mahindra Reddy" 
+      role="Frontend Developer"
+      bio="Full-stack leaning frontend developer who bridges the gap between design and implementation with clean component architecture."
+    />
+  </div>
+</section>
           
           {/* Contact Section */}
           <section className="bg-zinc-800/50 rounded-lg p-6 border border-zinc-700">

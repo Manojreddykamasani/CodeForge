@@ -8,7 +8,7 @@ function LoginPage() {
   const { login, signup } = useUserContext();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [name, setName] = useState(""); // Added for signup
+  const [name, setName] = useState(""); 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [isRegister, setIsRegister] = useState(false);

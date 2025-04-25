@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 import Editor from '@monaco-editor/react';
 import axios from 'axios';
 import { supabase } from '../supabaseClient';
 import { useUserContext } from '../context/UserContext';
 import { useCodeContext } from '../context/CodeContext';
+
 const CodingChallenge = () => {
+  const {questionId}=useParams()
   const [code, setCode] = useState('');
   const [output, setOutput] = useState('');
   const [attempts, setAttempts] = useState(0);
@@ -18,26 +21,41 @@ const CodingChallenge = () => {
   const [editorLanguage, setEditorLanguage] = useState('javascript');
   const [analysis, setAnalysis] = useState(null);
   const [weaknesses, setWeaknesses] = useState([]);
+  const [isloading,setisloading] =useState(false);
   const { user } = useUserContext();
+  const [testres,settestres]=useState([]);
   const user_id = user?.id || null;  
   const { 
-    question, 
+    question,
     loading: questionLoading, 
     error: questionError,
     loadQuestion ,
     setQuestion
   } = useCodeContext();
+  useEffect(() => {
+    const fetch = async () => {
+      await loadQuestion(questionId);
+      console.log("Question loaded:", question?.language);
+      
+      // Add null check and fallback
+      const safeLanguage = question?.language || 'javascript';
+      setLanguage(safeLanguage);
+      setEditorLanguage(safeLanguage === 'csharp' ? 'cpp' : safeLanguage);
+      
+      setCode(question?.code || '');
+    };
+    fetch();
+  }, [questionId]);
   const languages = [
-    { value: 'javascript', label: 'JavaScript' },
     { value: 'python', label: 'Python' },
+    { value: 'javascript', label: 'JavaScript' },
     { value: 'java', label: 'Java' },
     { value: 'csharp', label: 'C#' },
     { value: 'cpp', label: 'C++' },
   ];
 
-const visibleTestCases = question?.examples || [];  // Ensure question and testcases are defined
+const visibleTestCases = question?.testcases?.slice(0,2);  // Ensure question and testcases are defined
 const totalTestCases = question?.testcases?.length || 0;  // Default to 0 if testcases is not defined
-
 
   useEffect(() => {
     setCode('');
@@ -47,10 +65,22 @@ const totalTestCases = question?.testcases?.length || 0;  // Default to 0 if tes
   const handleNext = async () => {
     try {
       setLoading(true);
-      
-      // 1. Fetch the complete question from your backend
+      const { data, error } = await supabase
+    .from("submissions")
+    .select("question_id, questions(title)")
+    .eq("user_id",user_id);
+    if(error){
+      console.log("error fetching solved questions")
+    }
+    const titles = data.map((item) => item.questions.title);
+
       const response = await axios.post("http://localhost:5000/generate/next", {
-        user_id:user_id  // Send user_id as query parameter
+        user_id:user_id,
+        topic: question.topic,
+        weaknesses:weaknesses,
+        solved_questions:titles
+          // Send topic as part of the request
+         // Send user_id as query parameter
       });
   
       // 2. Use setQuestion from context to update the current question
@@ -65,8 +95,8 @@ const totalTestCases = question?.testcases?.length || 0;  // Default to 0 if tes
       setPassedTests(0);
       setAnalysis(null);
       setWeaknesses([]);
-      setLanguage('javascript');
-      setEditorLanguage('javascript');
+      setLanguage('python');
+      setEditorLanguage('python');
       setStartTime(Date.now());
   
     } catch (err) {
@@ -76,7 +106,7 @@ const totalTestCases = question?.testcases?.length || 0;  // Default to 0 if tes
     }
   };
   const handleRun = async () => {
-    setLoading(true);
+    setisloading(true);
     setOutput("Running code against visible test cases...");
     
     try {
@@ -97,10 +127,14 @@ const totalTestCases = question?.testcases?.length || 0;  // Default to 0 if tes
       }).join('\n\n');
 
       setOutput(formattedOutput);
+      const {data,error}= await supabase.from("questions").update({code:code,language:language}).eq("id",questionId).eq("user_id",user_id).select();
+      if(error){
+        console.error("Error updating code:", error);
+      }
     } catch (error) {
       setOutput("Error running code. Please check your implementation.");
     } finally {
-      setLoading(false);
+      setisloading(false);
     }
   };
 
@@ -111,47 +145,85 @@ const totalTestCases = question?.testcases?.length || 0;  // Default to 0 if tes
     setTimeTaken(timeSpent);
     setAttempts(prev => prev + 1);
     setSubmitted(true);
-
+    const {data,error}=await supabase.from("questions").update({code:code,language:language}).eq("id",questionId).eq("user_id",user_id).select();
+    if(error){
+      console.log("error updating code:", error);
+    }
     try {
       const res = await axios.post("http://localhost:5000/submit", {
         language,
         source_code: code,
         testCases: question.testcases,
       });
-
+      console.log(res.data);
+      settestres(res.data);
       const passedCount = res.data.results.filter(result => result.passed).length;
       setPassedTests(passedCount);
 
-      if (passedCount === totalTestCases) {
+      if (passedCount == totalTestCases) {
         setOutput(`✓ All ${totalTestCases} test cases passed!\nTime taken: ${timeSpent} seconds\nAttempts: ${attempts + 1}`);
         
-        try {
-          const analysisRes = await axios.post("http://localhost:5000/analyze", {
-            code,
-            language,
-            question,
-            testResults: res.data.results,
-            attempts: attempts + 1,
-            timeSpentInSeconds: timeSpent,
-            previousWeaknesses: weaknesses
-          });
-          
-          setAnalysis(analysisRes.data.analysis);
-          setWeaknesses(analysisRes.data.weaknesses);
-        } catch (analysisError) {
-          console.error("Analysis failed:", analysisError);
-        }
       } else {
+        console.log("Not all test cases passed");
         const failedDetails = res.data.results
-          .filter(result => !result.passed)
-          .map((result, index) => `Failed Test ${index + 1}: Expected ${result.expected_output}, Got ${result.actual_output}`)
-          .join('\n');
+  .filter(result => !result.passed)
+  .map((result, index) => {
+    const testCase = question.testcases[index];
+    return (
+      `Failed Test ${index + 1}:\n` +
+      `Input: ${testCase.input}\n` +
+      `Expected Output: ${result.expected_output}\n` +
+      `Your Output: ${result.actual_output}\n` +
+      `${result.error ? `Error: ${result.error}\n` : ''}` +
+      `----------------------------------`
+    );
+  })
+  .join('\n\n');
         
         setOutput(`✗ ${passedCount}/${totalTestCases} test cases passed\n\nFailed Cases:\n${failedDetails}\n\nTime taken: ${timeSpent} seconds\nAttempts: ${attempts + 1}`);
       }
     } catch (error) {
       setOutput("Error submitting code. Please try again.");
     } finally {
+      try{
+      const w = await axios.post("http://localhost:5000/weakness", {
+        user_id:user_id
+      })
+      console.log(w);
+      setWeaknesses(w.data.weaknesses);
+    }
+      catch(error){
+        console.log("Error fetching weaknesses:", error);
+      }
+      try {
+        const analysisRes = await axios.post("http://localhost:5000/analyze", {
+          code,
+          language,
+          question,
+          testResults: testres.results,
+          attempts: attempts + 1,
+          timeSpentInSeconds: timeSpent,
+          previousWeaknesses: weaknesses ,
+          user_id:user_id
+        });
+        const {data,error}=await supabase.from("submissions").insert([{
+          question_id:questionId,
+          user_id:user_id,
+          code:code,
+          language:language,
+          test_results:testres.results,
+          time_spent:timeSpent,
+          attempts:attempts+1,
+          xp:question.xp
+        }])
+        if(error){
+          console.error("failed saving submission:", error);
+        }
+        setAnalysis(analysisRes.data.analysis);
+        setWeaknesses(analysisRes.data.weaknesses);
+      } catch (analysisError) {
+        console.log("Analysis failed:", analysisError);
+      }
       setLoading(false);
     }
   };
@@ -162,6 +234,8 @@ const totalTestCases = question?.testcases?.length || 0;  // Default to 0 if tes
   const toggleHint = () => {
     setShowHint(!showHint);
   };
+  if (!question) return <div>Loading question...</div>;
+
 
   return (
     <div className="fixed inset-0 bg-gray-900 text-gray-100 flex flex-col overflow-hidden">
@@ -172,30 +246,47 @@ const totalTestCases = question?.testcases?.length || 0;  // Default to 0 if tes
           
           <div className="mb-4">
   <h2 className="text-lg font-semibold text-blue-400 mb-2">Constraints:</h2>
-  <ul className="font-mono text-sm text-gray-300 bg-gray-700 p-3 rounded space-y-1">
-    {question?.constraints?.map((constraint, index) => (
-      <li key={index} className="flex items-start">
-        <span className="text-blue-300 mr-2">•</span>
-        {constraint}
-      </li>
-    ))}
-  </ul>
+  <p className="font-mono text-sm text-gray-300 bg-gray-700 p-2 rounded">
+    {question.constraints}
+  </p>
 </div>
           
 
+<div>
+  <h2 className="text-lg font-semibold text-blue-400 mb-2">Sample Test Cases:</h2>
+  {visibleTestCases.map((testcase, index) => (
+    <div key={index} className="mb-4 bg-gray-700 p-3 rounded">
+      <p className="font-mono text-sm text-gray-200 mb-1">
+        <span className="text-blue-300">Input:</span>
+        {testcase.input.split('\n').map((line, i) => (
+          <span key={i}>
+            {i > 0 ? <br /> : ''}
+            {line}
+          </span>
+        ))}
+      </p>
+      <p className="font-mono text-sm text-gray-200">
+        <span className="text-blue-300">Output:</span>
+        {testcase.output.split('\n').map((line, i) => (
+          <span key={i}>
+            {i > 0 ? <br /> : ''}
+            {line}
+          </span>
+        ))}
+      </p>
+    </div>
+  ))}
+</div>
           <div>
-            <h2 className="text-lg font-semibold text-blue-400 mb-2">Sample Test Cases:</h2>
-            {visibleTestCases.map((testcase, index) => (
-              <div key={index} className="mb-4 bg-gray-700 p-3 rounded">
-                <p className="font-mono text-sm text-gray-200 mb-1">
-                  <span className="text-blue-300">Input:</span> {testcase.input}
-                </p>
-                <p className="font-mono text-sm text-gray-200">
-                  <span className="text-blue-300">Output:</span> {testcase.output}
-                </p>
-              </div>
-            ))}
-          </div>
+          <button 
+              onClick={handleNext}
+              className="mt-4 bg-red-600 hover:bg-red-700 text-black font-medium py-2 px-4 rounded-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 disabled:opacity-50"
+            >
+              Skip
+            </button>
+  
+</div>
+
           
           {attempts >= 3 && !showHint && (
             <button 
@@ -258,7 +349,7 @@ const totalTestCases = question?.testcases?.length || 0;  // Default to 0 if tes
                 disabled={loading}
                 className="bg-green-600 hover:bg-green-700 text-black font-medium py-2 px-6 rounded-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50 disabled:opacity-50"
               >
-                {loading ? 'Running...' : 'Run (2 Tests)'}
+                {isloading ? 'Running...' : 'Run (2 Tests)'}
               </button>
               <button 
                 onClick={handleSubmit}

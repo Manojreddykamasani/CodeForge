@@ -5,22 +5,22 @@ const BadgeWithProgress = ({ xp }) => {
     label: '🥉 Bronze',
     pillBg: 'bg-yellow-100',
     text: 'text-yellow-700',
-    range: [0, 49],
+    range: [0, 100],
   };
   
-  if (xp >= 80) {
+  if (xp > 300) {
     badge = {
       label: '🥇 Gold',
       pillBg: 'bg-yellow-200',
       text: 'text-yellow-800',
-      range: [80, 100],
+      range: [300,infinity],
     };
-  } else if (xp >= 50) {
+  } else if (xp > 100) {
     badge = {
       label: '🥈 Silver',
       pillBg: 'bg-gray-200',
       text: 'text-gray-800',
-      range: [50, 79],
+      range: [100,300],
     };
   }
   

@@ -5,7 +5,7 @@ const cors = require("cors");
 const app = express();
 const supabase=require("./supabase.js");
 const e = require("express");
-const PORT = 5000;
+const PORT = process.env.PORT || 5000; // Use PORT from environment or 5000 as default
 app.use(cors());
 app.use(express.json());
 const PISTON_URL = "https://emkc.org/api/v2/piston/execute";
@@ -128,6 +128,7 @@ Respond ONLY in **valid JSON** format (no markdown or triple backticks). Follow 
     .from('user_weaknesses')
     .update({ weaknesses: parsed.weaknesses })
     .eq('user_id', user_id);
+    console.log(user_id)
     if(error){
       console.error("Error updating weaknesses in Supabase:", error.message);
       return res.status(500).json({ error: "Failed to update weaknesses" });
@@ -153,7 +154,7 @@ The question should:
 4. **Description**: Provide a concise problem description that clearly explains the task.
 5. **Constraints**: Provide any relevant constraints that might apply to the problem. Example: "Array size up to 10^6".
 6. **Test Cases**: Include at least **5-10 test cases** in the following format:
-   - **Input**: "1 2 3 4 5\n3" (separate input values by spaces, and provide inputs and target values on new lines)
+   - **Input**: "1 2 3 4 5\n3" (separate input values by spaces, and provide inputs and target values on new lines)(strictly dont use any whitespaces extra make it exactly like the example and no wrong testcase values)
    - **Output**: "2" (corresponding output with values separated by space, without any text or brackets)
    - Each test case should include a variety of edge cases (e.g., empty array, array with one element, large array).
 7. **Hint**: Provide a useful hint that would help a student who is struggling. Example: "Think about edge cases like empty arrays or arrays with only one element."
@@ -221,13 +222,27 @@ Ensure the question is **fresh, clear, and solvable** for a beginner in the topi
         return res.status(500).json({ error: "Failed to generate question" });
       }
       else{
-    res.json(parsed);}
+        const{data:id,error}= await supabase.from("questions").select("id").eq("title",parsed.title).eq("user_id",user_id).single()
+        if(error) { 
+          console.error("Error fetching question ID:", error.message);
+
+        }
+        console.log("Inserted data:", id);
+        res.json({
+          ...parsed,
+          id: id.id
+        });}
     
 }
 catch (error) {
     console.error("Together API error:", error.message);
     res.status(500).json({ error: "Failed to generate question" });
   }
+})
+app.post("/weakness", async(req,res)=>{
+  const {user_id}= req.body;
+  const {data,error}= await supabase.from("user_weaknesses").select("weaknesses").eq("user_id",user_id).single();
+  res.json(data)
 })
 app.post("/generate/next", async (req, res) => {
   const { topic, weaknesses, solved_questions, user_id } = req.body;
@@ -244,6 +259,18 @@ Your task is to:
   - Challenges one or more of the student’s weaknesses.
   - Maintains continuity with what the student has recently worked on.
   - Fits within the current topic and supports the student’s steady skill growth.
+The question should:
+1. **Topic**: Arrays
+2. **Difficulty**: Easy (suitable for someone starting with this topic)
+3. **XP**: Based on difficulty (Easy = 30, Medium = 60, Hard = 100)
+4. **Description**: Provide a concise problem description that clearly explains the task.
+5. **Constraints**: Provide any relevant constraints that might apply to the problem. Example: "Array size up to 10^6".
+6. **Test Cases**: Include at least **5-10 test cases** in the following format:
+   - **Input**: "1 2 3 4 5\n3" (separate input values by spaces, and provide inputs and target values on new lines)(strictly dont use any whitespaces extra make it exactly like the example and no wrong testcase values)
+   - **Output**: "2" (corresponding output with values separated by space, without any text or brackets)
+   - Each test case should include a variety of edge cases (e.g., empty array, array with one element, large array).
+7. **Hint**: Provide a useful hint that would help a student who is struggling. Example: "Think about edge cases like empty arrays or arrays with only one element."
+
 
 Please format the question in the following exact way in strict json:
 - title: Text (Title of the problem)

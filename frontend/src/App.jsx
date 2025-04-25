@@ -124,7 +124,7 @@ function App() {
                     }
                   />
                   <Route
-                    path="/codingplayground"
+                    path="/codingplayground/:questionId"
                     element={
                       <ProtectedRoute>
                             <CodeProvider>

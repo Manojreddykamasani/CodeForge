@@ -33,6 +33,7 @@ export const CodeProvider = ({ children }) => {
       if (!data) throw new Error('Question not found');
   
       setQuestion(data);
+      console.log("Question loaded:", data);
       return data;
     } catch (err) {
       setError(err.message || "Failed to load question");

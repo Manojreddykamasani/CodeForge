@@ -115,6 +115,11 @@ const AuthModal = ({ isVisible, hideModal }) => {
       
       // Signup successful
       console.log('Signup successful:', data);
+      supabase.from('weaknesses').insert([
+        {
+          weakness: []
+        }
+      ])
       
       // If signup requires email verification
       if (data.user && !data.session) {
