@@ -5,7 +5,6 @@ import FeaturedCard from "./ui/FeaturedCard";
 import { useUserContext } from "../context/UserContext";
 import { useNavigationContext } from "../context/NavigationContext";
 import { useUIContext } from "../context/UIContext";
-
 // Home Content Component
 const HomeContent = () => {
   const { user } = useUserContext();
@@ -33,11 +32,13 @@ const HomeContent = () => {
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {/* Featured cards */}
+          <button onClick={goToCodingPlayground()}>
           <FeaturedCard 
             icon="🚀" 
             title="Getting Started with DSA" 
             color="from-blue-500 to-violet-500"
           />
+          </button>
           <FeaturedCard 
             icon="🏆" 
             title="Competitive Programming" 

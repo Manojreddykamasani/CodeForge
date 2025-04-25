@@ -1,10 +1,9 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, use, useContext, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useUserContext } from './UserContext';
-
+import { useCodeContext } from './CodeContext';
 // Create the context
 const NavigationContext = createContext();
-
 // Custom hook to use the NavigationContext
 export const useNavigationContext = () => {
   const context = useContext(NavigationContext);
@@ -19,7 +18,7 @@ export const NavigationProvider = ({ children }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { logout } = useUserContext();
-  
+  const { loadQuestion } = useCodeContext();
   // Determine active tab based on current path
   const getActiveTabFromPath = (path) => {
     if (path === '/') return 'home';
@@ -50,8 +49,9 @@ export const NavigationProvider = ({ children }) => {
   const goToAbout = () => navigate('/about');
   const goToProfile = () => navigate('/profile');
   const goToSettings = () => navigate('/settings');
-  const goToCodingPlayground = (problemId) => 
-    navigate(problemId ? `/playground?problem=${problemId}` : '/playground');
+  const goToCodingPlayground = (id)=>
+    { loadQuestion(id)
+      navigate('/codingplayground')}
   
   // Handle logout
   const handleLogout = async () => {

@@ -127,9 +127,10 @@ function App() {
                     path="/codingplayground"
                     element={
                       <ProtectedRoute>
-                        <CodeProvider>
+                            <CodeProvider>
+
                           <CodingChallenge />
-                        </CodeProvider>
+                          </CodeProvider>
                       </ProtectedRoute>
                     }
                   />
