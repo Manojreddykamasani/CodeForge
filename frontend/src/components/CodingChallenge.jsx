@@ -38,11 +38,15 @@ const CodingChallenge = () => {
       console.log("Question loaded:", question?.language);
       
       // Add null check and fallback
-      const safeLanguage = question?.language || 'javascript';
+      const {data,error}=await supabase.from("submissions").select("code,language").eq("user_id",user_id).eq("question_id",questionId).single();
+      if(error){
+        console.log("error fetching code:", error);
+      }
+      const safeLanguage = data?.language || 'python';
       setLanguage(safeLanguage);
       setEditorLanguage(safeLanguage === 'csharp' ? 'cpp' : safeLanguage);
       
-      setCode(question?.code || '');
+      setCode(data?.code || '');
     };
     fetch();
   }, [questionId]);
