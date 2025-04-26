@@ -65,6 +65,17 @@ const [hasSubmission, setHasSubmission] = useState(false);
         setEditorLanguage('python');
       }
     };
+    setAnalysis(null)
+    setWeaknesses([]);
+    setOutput('');
+    setAttempts(0);
+    setTimeTaken(0);
+    setStartTime(null);
+    setShowHint(false);
+    setSubmitted(false);
+    setPassedTests(0);
+    setisloading(false);
+    setLoading(false);
     fetch();
   }, [questionId, user_id]); // Add user_id to dependencies
   const languages = [
