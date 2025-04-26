@@ -39,6 +39,7 @@ const CodingChallenge = () => {
       
       // Add null check and fallback
       const {data,error}=await supabase.from("submissions").select("code,language").eq("user_id",user_id).eq("question_id",questionId).single();
+      console.log("Fetched code:", data);
       if(error){
         console.log("error fetching code:", error);
       }
