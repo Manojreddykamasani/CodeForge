@@ -126,7 +126,7 @@ function AboutPage() {
     <TeamMemberCard 
       name="Manoj Reddy" 
       role="Full-stack  Developer & Team Lead"
-      bio="Senior developer with 5+ years of experience in building scalable backend systems. Leads the technical architecture and team coordination."
+      bio=" Leads the technical architecture and team coordination."
     />
     <TeamMemberCard 
       name="Sreenidhi Reddy" 
