@@ -31,9 +31,7 @@ const HomeContent = () => {
       <section className="mb-12">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-bold">Featured Topics</h2>
-          <a href="#" className="text-violet-400 hover:text-violet-300 text-sm font-medium flex items-center gap-1">
-            View all topics <span>→</span>
-          </a>
+          
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">

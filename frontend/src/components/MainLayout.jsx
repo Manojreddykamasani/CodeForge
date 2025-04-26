@@ -44,14 +44,7 @@ const MainLayout = ({ children }) => {
         
         <div className="flex items-center gap-5">
           <div className="hidden md:flex items-center gap-5">
-            <UserNavLink active={activeTab === "profile"} onClick={goToProfile}>
-              <span className="text-lg">👤</span>
-              Profile
-            </UserNavLink>
-            <UserNavLink active={activeTab === "settings"} onClick={goToSettings}>
-              <span className="text-lg">⚙</span>
-              Settings
-            </UserNavLink>
+            
             <UserNavLink onClick={handleLogout}>
               <span className="text-lg">🚪</span>
               Logout
