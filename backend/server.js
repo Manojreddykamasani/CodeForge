@@ -338,7 +338,16 @@ Ensure the question is **clear, well-structured, relevant to their journey, and 
         return res.status(500).json({ error: "Failed to generate question" });
       }
       else{
-    res.json(parsed);}
+        const{data:id,error}= await supabase.from("questions").select("id").eq("title",parsed.title).eq("user_id",user_id).single()
+        if(error) { 
+          console.error("Error fetching question ID:", error.message);
+
+        }
+        console.log("Inserted data:", id);
+        res.json({
+          id: id.id
+        });
+    }
   } catch (error) {
     console.error("Together API error:", error.message);
     res.status(500).json({ error: "Failed to generate next question" });

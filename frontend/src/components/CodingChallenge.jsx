@@ -5,9 +5,11 @@ import axios from 'axios';
 import { supabase } from '../supabaseClient';
 import { useUserContext } from '../context/UserContext';
 import { useCodeContext } from '../context/CodeContext';
+import { useNavigationContext } from '../context/NavigationContext';
 
 const CodingChallenge = () => {
   const {questionId}=useParams()
+    const { goToCodingPlayground } = useNavigationContext();
   const [code, setCode] = useState('');
   const [output, setOutput] = useState('');
   const [attempts, setAttempts] = useState(0);
@@ -22,6 +24,7 @@ const CodingChallenge = () => {
   const [analysis, setAnalysis] = useState(null);
   const [weaknesses, setWeaknesses] = useState([]);
   const [isloading,setisloading] =useState(false);
+const [hasSubmission, setHasSubmission] = useState(false);
   const { user } = useUserContext();
   const [testres,settestres]=useState([]);
   const user_id = user?.id || null;  
@@ -33,24 +36,37 @@ const CodingChallenge = () => {
     setQuestion
   } = useCodeContext();
   useEffect(() => {
+    setHasSubmission(false);
     const fetch = async () => {
       await loadQuestion(questionId);
-      console.log("Question loaded:", question?.language);
       
-      // Add null check and fallback
-      const {data,error}=await supabase.from("submissions").select("code,language").eq("user_id",user_id).eq("question_id",questionId).single();
-      console.log("Fetched code:", data);
-      if(error){
+      // Check for existing submission
+      const { data, error } = await supabase
+        .from("submissions")
+        .select("code,language")
+        .eq("user_id", user_id)
+        .eq("question_id", questionId)
+        .single();
+  
+      if (error && error.code !== 'PGRST116') { // Ignore "No rows found" error
         console.log("error fetching code:", error);
       }
-      const safeLanguage = data?.language || 'python';
-      setLanguage(safeLanguage);
-      setEditorLanguage(safeLanguage === 'csharp' ? 'cpp' : safeLanguage);
-      
-      setCode(data?.code || '');
+  
+      if (data) {
+        setHasSubmission(true); // Question exists in submissions
+        const safeLanguage = data.language || 'python';
+        setLanguage(safeLanguage);
+        setEditorLanguage(safeLanguage === 'csharp' ? 'cpp' : safeLanguage);
+        setCode(data.code || '');
+      } else {
+        setHasSubmission(false);
+        setCode('');
+        setLanguage('python');
+        setEditorLanguage('python');
+      }
     };
     fetch();
-  }, [questionId]);
+  }, [questionId, user_id]); // Add user_id to dependencies
   const languages = [
     { value: 'python', label: 'Python' },
     { value: 'javascript', label: 'JavaScript' },
@@ -89,20 +105,7 @@ const totalTestCases = question?.testcases?.length || 0;  // Default to 0 if tes
       });
   
       // 2. Use setQuestion from context to update the current question
-      setQuestion(response.data);  // This comes from your CodeContext
-  
-      setCode('');
-      setOutput('');  
-      setAttempts(0);
-      setTimeTaken(0);
-      setShowHint(false);
-      setSubmitted(false);
-      setPassedTests(0);
-      setAnalysis(null);
-      setWeaknesses([]);
-      setLanguage('python');
-      setEditorLanguage('python');
-      setStartTime(Date.now());
+      goToCodingPlayground(question.topic);
   
     } catch (err) {
       console.error("Failed to load next question:", err);
@@ -167,8 +170,15 @@ const totalTestCases = question?.testcases?.length || 0;  // Default to 0 if tes
   
       if (passedCount == totalTestCases) {
         setOutput(`✓ All ${totalTestCases} test cases passed!\nTime taken: ${timeSpent} seconds\nAttempts: ${attempts + 1}`);
+        
       } else {
-        // ... (keep your existing failed details code)
+        console.log("Not all test cases passed");
+        const failedDetails = res.data.results
+          .filter(result => !result.passed)
+          .map((result, index) => `Failed Test ${index + 1}: Expected ${result.expected_output}, Got ${result.actual_output}`)
+          .join('\n');
+        
+        setOutput(`✗ ${passedCount}/${totalTestCases} test cases passed\n\nFailed Cases:\n${failedDetails}\n\nTime taken: ${timeSpent} seconds\nAttempts: ${attempts + 1}`);
       }
   
       // Use res.data directly instead of testres
@@ -348,7 +358,7 @@ const totalTestCases = question?.testcases?.length || 0;  // Default to 0 if tes
               {output || "Run or submit your code to see output"}
             </div>
             
-            {analysis && (
+            {(analysis ) && (
               <div className="mt-3 bg-gray-800 p-3 rounded">
                 <h4 className="text-md font-semibold text-green-400 mb-1">Analysis</h4>
                 <p className="text-gray-300 text-sm mb-2">{analysis}</p>
@@ -362,14 +372,18 @@ const totalTestCases = question?.testcases?.length || 0;  // Default to 0 if tes
                     </ul>
                   </div>
                 )}
-                <button
-                  onClick={handleNext}
-                  className="mt-3 bg-purple-600 hover:bg-purple-700 text-black font-medium py-2 px-4 rounded-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50"
-                >
-                  Next Challenge
-                </button>
               </div>
             )}
+            {(hasSubmission || analysis) &&(
+              <button
+              onClick={handleNext}
+              className="mt-3 bg-purple-600 hover:bg-purple-700 text-black font-medium py-2 px-4 rounded-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50"
+            >
+              Next Challenge
+            </button>
+            )
+
+            }
             
             {submitted && !analysis && (
               <div className="mt-3">

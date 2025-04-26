@@ -2,6 +2,7 @@ import React, { createContext, use, useContext, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useUserContext } from './UserContext';
 import { supabase } from '../supabaseClient';
+import LoadingOverlay from '../components/LoadingOverlay';
 import axios from 'axios';
 // Create the context
 const NavigationContext = createContext();
@@ -16,6 +17,8 @@ export const useNavigationContext = () => {
 
 // Provider component
 export const NavigationProvider = ({ children }) => {
+  const [isNavigating, setIsNavigating] = useState(false);
+
   const navigate = useNavigate();
   const location = useLocation();
   const { logout,user } = useUserContext();
@@ -48,6 +51,7 @@ export const NavigationProvider = ({ children }) => {
   const goToProfile = () => navigate('/profile');
   const goToSettings = () => navigate('/settings');
   const goToCodingPlayground = async (topic) => {
+    setIsNavigating(true);
     const TIMEOUT = 50000; // Timeout duration in milliseconds (50 seconds)
     
     try {
@@ -90,14 +94,10 @@ export const NavigationProvider = ({ children }) => {
       console.error("Error in goToCodingPlayground:", error);
       alert(error.message || "Failed to fetch or generate the question. Please try again.");
     }
+    finally{
+      setIsNavigating(false);
+    }
   };
-  
-  
-  
-  
-  
-  
-
   
   // Handle logout
   const handleLogout = async () => {
@@ -121,8 +121,12 @@ export const NavigationProvider = ({ children }) => {
     goToProfile,
     goToSettings,
     goToCodingPlayground,
-    handleLogout
+    handleLogout,
+    isNavigating
   };
 
-  return <NavigationContext.Provider value={value}>{children}</NavigationContext.Provider>;
+  return <NavigationContext.Provider value={value}>
+    {children}
+    <LoadingOverlay isLoading={isNavigating} />
+  </NavigationContext.Provider>;
 };

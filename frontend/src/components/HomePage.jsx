@@ -8,7 +8,13 @@ import { useUIContext } from "../context/UIContext";
 // Home Content Component
 const HomeContent = () => {
   const { user } = useUserContext();
-  const { goToCodingPlayground } = useNavigationContext();
+  const { goToCodingPlayground, isNavigating
+  } = useNavigationContext();
+  const handleTopicClick = (topic) => {
+    if (!isNavigating) {
+      goToCodingPlayground(topic);
+    }
+  };
   
   return (
     <div className="p-8 max-w-7xl mx-auto w-full">
@@ -32,7 +38,9 @@ const HomeContent = () => {
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {/* Featured cards */}
-          <button onClick={() => goToCodingPlayground("arrays")}>
+          <button onClick={() => handleTopicClick("Arrays")}
+      disabled={isNavigating}
+      className={isNavigating ? "opacity-50 cursor-not-allowed" : ""}>
           <FeaturedCard 
             icon="🚀" 
             title="Getting Started with DSA" 
@@ -61,56 +69,72 @@ const HomeContent = () => {
       <section className="mb-8">
   <h2 className="text-2xl font-bold mb-6">Core DSA Topics</h2>
   <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
-    <button onClick={() => goToCodingPlayground("Arrays")}>
+    <button onClick={() => handleTopicClick("Arrays")}
+      disabled={isNavigating}
+      className={isNavigating ? "opacity-50 cursor-not-allowed" : ""}>
       <TopicCard 
         icon="📊" 
         title="Arrays" 
         description="Master linear data structures and character manipulation" 
       />
     </button>
-    <button onClick={() => goToCodingPlayground("Linkedlists")}>
+    <button onClick={() => handleTopicClick("Linkedlists")}
+      disabled={isNavigating}
+      className={isNavigating ? "opacity-50 cursor-not-allowed" : ""}>
       <TopicCard 
         icon="🔗" 
         title="Linkedlists" 
         description="Understand node-based data structures and pointer logic" 
       />
     </button>
-    <button onClick={() => goToCodingPlayground("Trees")}>
+    <button onClick={() => handleTopicClick("Trees")}
+      disabled={isNavigating}
+      className={isNavigating ? "opacity-50 cursor-not-allowed" : ""}>
       <TopicCard 
         icon="🌳" 
         title="Trees" 
         description="Dive into hierarchical structures and traversals" 
       />
     </button>
-    <button onClick={() => goToCodingPlayground("Graphs")}>
+    <button onClick={() => handleTopicClick("Graphs")}
+      disabled={isNavigating}
+      className={isNavigating ? "opacity-50 cursor-not-allowed" : ""}>
       <TopicCard 
         icon="🌐" 
         title="Graphs" 
         description="Solve problems involving networks and connectivity" 
       />
     </button>
-    <button onClick={() => goToCodingPlayground("Dp")}>
+    <button onClick={() => handleTopicClick("Dynamic Programming")}
+      disabled={isNavigating}
+      className={isNavigating ? "opacity-50 cursor-not-allowed" : ""}>
       <TopicCard 
         icon="⚡" 
         title="Dp" 
         description="Optimize problems using dynamic programming techniques" 
       />
     </button>
-    <button onClick={() => goToCodingPlayground("Searching")}>
+    <button onClick={() => handleTopicClick("Searching")}
+      disabled={isNavigating}
+      className={isNavigating ? "opacity-50 cursor-not-allowed" : ""}>
       <TopicCard 
         icon="🔍" 
         title="Searching" 
         description="Explore efficient element search methods" 
       />
     </button>
-    <button onClick={() => goToCodingPlayground("Sorting")}>
+    <button onClick={() => handleTopicClick("Sorting")}
+      disabled={isNavigating}
+      className={isNavigating ? "opacity-50 cursor-not-allowed" : ""}>
       <TopicCard 
         icon="🔀" 
         title="Sorting" 
         description="Understand algorithms to order data efficiently" 
       />
     </button>
-    <button onClick={() => goToCodingPlayground("Recursion")}>
+    <button onClick={() => handleTopicClick("Recursion")}
+      disabled={isNavigating}
+      className={isNavigating ? "opacity-50 cursor-not-allowed" : ""}>
       <TopicCard 
         icon="🧩" 
         title="Recursion" 
