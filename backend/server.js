@@ -261,7 +261,7 @@ Your task is to:
   - Maintains continuity with what the student has recently worked on.
   - Fits within the current topic and supports the student’s steady skill growth.
 The question should:
-1. **Topic**: Arrays
+1. **Topic**: ${topic}
 2. **Difficulty**: Easy (suitable for someone starting with this topic)
 3. **XP**: Based on difficulty (Easy = 30, Medium = 60, Hard = 100)
 4. **Description**: Provide a concise problem description that clearly explains the task.
