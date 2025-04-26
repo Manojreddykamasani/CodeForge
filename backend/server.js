@@ -6,7 +6,8 @@ const app = express();
 const supabase=require("./supabase.js");
 const e = require("express");
 const PORT = process.env.PORT || 5000; // Use PORT from environment or 5000 as default
-app.use(cors());
+
+app.use(cors())
 app.use(express.json());
 const PISTON_URL = "https://emkc.org/api/v2/piston/execute";
 const TOGETHER_API_KEY = 'tgp_v1_7H6rlv1Ow3Yf5UCn8E1ugW-shqYD9AnVOvF9XIA-lsw';
