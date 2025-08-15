@@ -106,16 +106,14 @@ const totalTestCases = question?.testcases?.length || 0;  // Default to 0 if tes
     }
     const titles = data.map((item) => item.questions.title);
 
-      const response = await axios.post("https://codeforge-4k0k.onrender.com/generate/next", {
+      const response = await axios.post("https://codeforge-2sfs.onrender.com/generate/next", {
         user_id:user_id,
         topic: question.topic,
         weaknesses:weaknesses,
         solved_questions:titles
-          // Send topic as part of the request
-         // Send user_id as query parameter
       });
   
-      // 2. Use setQuestion from context to update the current question
+
       goToCodingPlayground(question.topic);
   
     } catch (err) {
@@ -129,7 +127,7 @@ const totalTestCases = question?.testcases?.length || 0;  // Default to 0 if tes
     setOutput("Running code against visible test cases...");
     
     try {
-      const res = await axios.post("https://codeforge-4k0k.onrender.com/submit", {
+      const res = await axios.post("https://codeforge-2sfs.onrender.com/submit", {
         language,
         source_code: code,
         testCases: visibleTestCases,
@@ -169,7 +167,7 @@ const totalTestCases = question?.testcases?.length || 0;  // Default to 0 if tes
       const {data,error} = await supabase.from("questions").update({code:code,language:language}).eq("id",questionId).eq("user_id",user_id).select();
       if(error) console.log("error updating code:", error);
   
-      const res = await axios.post("https://codeforge-4k0k.onrender.com/submit", {
+      const res = await axios.post("https://codeforge-2sfs.onrender.com/submit", {
         language,
         source_code: code,
         testCases: question.testcases,
@@ -194,10 +192,10 @@ const totalTestCases = question?.testcases?.length || 0;  // Default to 0 if tes
   
       // Use res.data directly instead of testres
       try {
-        const w = await axios.post("https://codeforge-4k0k.onrender.com/weakness", { user_id });
+        const w = await axios.post("https://codeforge-2sfs.onrender.com/weakness", { user_id });
         setWeaknesses(w.data.weaknesses);
   
-        const analysisRes = await axios.post("https://codeforge-4k0k.onrender.com/analyze", {
+        const analysisRes = await axios.post("https://codeforge-2sfs.onrender.com/analyze", {
           code,
           language,
           question,
